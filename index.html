@@ -1,0 +1,1248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Godot TPS Multiplayer Template — Documentation</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary: #64748b;
+            --bg: #0f172a;
+            --bg-surface: #1e293b;
+            --bg-card: #334155;
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #38bdf8;
+            --danger: #ef4444;
+            --success: #22c55e;
+            --warning: #eab308;
+            --border: #475569;
+            --radius: 8px;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", monospace;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font);
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+        }
+
+        /* Sidebar */
+        #sidebar {
+            width: 300px;
+            background: var(--bg-surface);
+            border-right: 1px solid var(--border);
+            height: 100vh;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            z-index: 10;
+            position: fixed;
+            left: 0;
+            top: 0;
+        }
+
+        .sidebar-header {
+            padding: 1.5rem 1rem;
+            border-bottom: 1px solid var(--border);
+            background: rgba(0,0,0,0.2);
+        }
+
+        .sidebar-header h1 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 0.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .sidebar-header p {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .nav-search {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .nav-search input {
+            width: 100%;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 0.5rem 0.75rem;
+            color: var(--text);
+            font-size: 0.875rem;
+            outline: none;
+        }
+
+        .nav-search input:focus {
+            border-color: var(--accent);
+        }
+
+        .nav-menu {
+            padding: 1rem;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .nav-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .nav-section-title {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+            padding: 0 0.5rem;
+            font-weight: 600;
+        }
+
+        .nav-item {
+            margin-bottom: 0.25rem;
+        }
+
+        .nav-item a {
+            display: block;
+            padding: 0.5rem 0.75rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            border-radius: var(--radius);
+            font-size: 0.875rem;
+            transition: all 0.15s;
+            border-left: 3px solid transparent;
+        }
+
+        .nav-item a:hover {
+            background: rgba(255,255,255,0.05);
+            color: var(--text);
+            border-left-color: var(--primary);
+        }
+
+        .nav-item a.active {
+            background: rgba(37, 99, 235, 0.15);
+            color: var(--accent);
+            border-left-color: var(--accent);
+        }
+
+        /* Mobile menu toggle */
+        .mobile-toggle {
+            display: none;
+            position: fixed;
+            top: 0.75rem;
+            left: 0.75rem;
+            z-index: 100;
+            background: var(--primary);
+            border: none;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius);
+            cursor: pointer;
+        }
+
+        /* Main content */
+        #main {
+            margin-left: 300px;
+            flex: 1;
+            height: 100vh;
+            overflow-y: auto;
+            padding: 2rem 3rem 4rem;
+        }
+
+        .hero {
+            margin-bottom: 2rem;
+            padding: 2rem;
+            background: linear-gradient(135deg, var(--bg-surface) 0%, var(--bg-card) 100%);
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+        }
+
+        .hero h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .hero p {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+
+        .hero-badges {
+            margin-top: 1rem;
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.35rem 0.75rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .badge.blue { color: var(--accent); border-color: rgba(56, 189, 248, 0.3); }
+
+        .content-section {
+            margin-bottom: 3rem;
+        }
+
+        .content-section h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--text);
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .content-section h3 {
+            font-size: 1.125rem;
+            margin: 1.5rem 0 0.75rem;
+            color: var(--accent);
+        }
+
+        .content-section p {
+            margin-bottom: 1rem;
+            color: var(--text-muted);
+        }
+
+        .content-section ul, .content-section ol {
+            margin-bottom: 1rem;
+            padding-left: 1.5rem;
+            color: var(--text-muted);
+        }
+
+        .content-section li {
+            margin-bottom: 0.5rem;
+        }
+
+        /* Code blocks */
+        pre {
+            background: #0d1117;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1rem;
+            overflow-x: auto;
+            margin-bottom: 1rem;
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            line-height: 1.5;
+        }
+
+        code {
+            font-family: var(--font-mono);
+            background: var(--bg-card);
+            padding: 0.15rem 0.3rem;
+            border-radius: 4px;
+            color: var(--accent);
+            font-size: 0.875em;
+        }
+
+        pre code {
+            background: transparent;
+            padding: 0;
+            color: #e6edf5;
+            font-size: 0.85rem;
+        }
+
+        /* Callout boxes */
+        .callout {
+            padding: 1rem 1.25rem;
+            border-radius: var(--radius);
+            margin-bottom: 1.5rem;
+            border-left: 4px solid;
+        }
+
+        .callout.info { background: rgba(56, 189, 248, 0.1); border-left-color: var(--accent); }
+        .callout.warning { background: rgba(234, 179, 8, 0.1); border-left-color: var(--warning); }
+        .callout.danger { background: rgba(239, 68, 68, 0.1); border-left-color: var(--danger); }
+        .callout.success { background: rgba(34, 197, 94, 0.1); border-left-color: var(--success); }
+
+        .callout h4 {
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .callout p {
+            margin-bottom: 0;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .callout p:last-child { margin-bottom: 0; }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1.5rem;
+            font-size: 0.875rem;
+        }
+
+        th, td {
+            border: 1px solid var(--border);
+            padding: 0.6rem 0.8rem;
+            text-align: left;
+        }
+
+        th {
+            background: var(--bg-card);
+            color: var(--text);
+            font-weight: 600;
+        }
+
+        tr:nth-child(even) { background: rgba(255,255,255,0.02); }
+
+        /* Grid for features */
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .feature-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+        }
+
+        .feature-card h4 {
+            margin-bottom: 0.5rem;
+            color: var(--accent);
+        }
+
+        .feature-card p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 0;
+        }
+
+        /* Path/file labels */
+        .path {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--accent);
+            background: rgba(255,255,255,0.05);
+            padding: 0.1rem 0.3rem;
+            border-radius: 4px;
+            display: inline-block;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Status badges */
+        .status-pass { color: var(--success); }
+        .status-fail { color: var(--danger); }
+        .status-partial { color: var(--warning); }
+        .status-not-tested { color: var(--secondary); }
+
+        footer {
+            margin-top: 4rem;
+            padding: 2rem;
+            border-top: 1px solid var(--border);
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        @media (max-width: 768px) {
+            #sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.2s;
+            }
+            #sidebar.open {
+                transform: translateX(0);
+            }
+            .mobile-toggle {
+                display: block;
+            }
+            #main {
+                margin-left: 0;
+                padding: 1.5rem;
+            }
+        }
+
+        .back-to-top {
+            position: fixed;
+            bottom: 1rem;
+            right: 1rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.75rem 1rem;
+            border-radius: var(--radius);
+            cursor: pointer;
+            display: none;
+        }
+        .back-to-top:hover {
+            background: var(--primary-dark);
+        }
+
+        .breadcrumb {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+        }
+        .breadcrumb a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+
+    <button class="mobile-toggle" id="mobileToggle">☰ Menu</button>
+    <button class="back-to-top" id="backToTop">↑ Top</button>
+
+    <nav id="sidebar">
+        <div class="sidebar-header">
+            <h1>🦊 Godot TPS Multiplayer</h1>
+            <p>Template • Godot 4.6</p>
+        </div>
+        <div class="nav-search">
+            <input type="text" id="navSearch" placeholder="Search documentation...">
+        </div>
+        <div class="nav-menu">
+            <div class="nav-section">
+                <div class="nav-section-title">Getting Started</div>
+                <div class="nav-item"><a href="#home" class="nav-link">Home & Overview</a></div>
+                <div class="nav-item"><a href="#installation" class="nav-link">Installation & Setup</a></div>
+                <div class="nav-item"><a href="#project-structure" class="nav-link">Project Structure</a></div>
+                <div class="nav-item"><a href="#quick-start" class="nav-link">Quick Start</a></div>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">Core Systems</div>
+                <div class="nav-item"><a href="#architecture" class="nav-link">Architecture</a></div>
+                <div class="nav-item"><a href="#networking" class="nav-link">Networking & Multiplayer</a></div>
+                <div class="nav-item"><a href="#gameplay" class="nav-link">Gameplay & Combat</a></div>
+                <div class="nav-item"><a href="#match-lifecycle" class="nav-link">Match Lifecycle</a></div>
+                <div class="nav-item"><a href="#ui-system" class="nav-link">UI System</a></div>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">Configuration</div>
+                <div class="nav-item"><a href="#configuration" class="nav-link">Settings & Customization</a></div>
+                <div class="nav-item"><a href="#weapons" class="nav-link">Adding Weapons</a></div>
+                <div class="nav-item"><a href="#maps" class="nav-link">Adding Maps</a></div>
+                <div class="nav-item"><a href="#export" class="nav-link">Export & Build</a></div>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">Reference</div>
+                <div class="nav-item"><a href="#api" class="nav-link">API Reference</a></div>
+                <div class="nav-item"><a href="#troubleshooting" class="nav-link">Troubleshooting</a></div>
+                <div class="nav-item"><a href="#disconnect-errors" class="nav-link">Disconnect Errors Explained</a></div>
+                <div class="nav-item"><a href="#license" class="nav-link">License & Commercial Terms</a></div>
+            </div>
+        </div>
+    </nav>
+
+    <main id="main">
+        <!-- HOME -->
+        <section id="home" class="content-section hero">
+            <h1>Godot TPS Multiplayer Template</h1>
+            <p>A commercial-grade, client-server multiplayer template for third-person shooters, built with <strong>Godot 4.6</strong>. Includes a dedicated server project, authoritative hit validation, transform snapshot interpolation, lobby/matchmaking, team deathmatch, health regeneration, respawn, rematch voting, and a complete UI suite.</p>
+            
+            <div class="hero-badges">
+                <span class="badge blue">Godot 4.6</span>
+                <span class="badge blue">GDScript</span>
+                <span class="badge blue">ENet UDP</span>
+                <span class="badge blue">Forward Plus</span>
+                <span class="badge blue">GL Compatibility</span>
+                <span class="badge blue">Commercial</span>
+            </div>
+        </section>
+
+        <div class="feature-grid">
+            <div class="feature-card">
+                <h4>🌐 Server-Authoritative Networking</h4>
+                <p>Server validates every shot, performs hitscan raycasts, applies damage, and tracks scores. Clients never apply damage directly.</p>
+            </div>
+            <div class="feature-card">
+                <h4>⏱️ Clock Sync & Interpolation</h4>
+                <p>NTP-style clock synchronization and RTT measurement with transform snapshot interpolation at 20 Hz for smooth remote player movement.</p>
+            </div>
+            <div class="feature-card">
+                <h4>🏃‍♂️ Lobby & Matchmaking</h4>
+                <p>Server lobby allocation (up to 4 concurrent lobbies, 12 max players), lobby lock when full, map load handshake, and match start synchronization.</p>
+            </div>
+            <div class="feature-card">
+                <h4>🔫 Team Deathmatch</h4>
+                <p>Score-limit win condition, timed match, team assignment (Blue/Red), per-team spawn points, kill feed, and scoreboard.</p>
+            </div>
+            <div class="feature-card">
+                <h4>🔄 Rematch System</h4>
+                <p>End-of-match results screen with rematch voting. Original-roster rematch sessions automatically recreate replacement lobbies.</p>
+            </div>
+            <div class="feature-card">
+                <h4>🖼️ Complete UI Suite</h4>
+                <p>Login/profile creation, main menu, matchmaking UI, match HUD (health, ammo, ping, kill feed), results screen, and pause menu.</p>
+            </div>
+        </div>
+
+        <div class="callout info">
+            <h4>📋 What's Included</h4>
+            <p>Two standalone Godot projects: <code>Tps Client/</code> and <code>Tps Server/</code>. Each has its own <code>project.godot</code>, scenes, resources, and <code>res://</code> namespace. No external backend, matchmaking service, or cloud backend required.</p>
+        </div>
+        </section>
+
+        <!-- INSTALLATION -->
+        <section id="installation" class="content-section">
+            <h2>Installation & Setup</h2>
+            
+            <h3>Requirements</h3>
+            <table>
+                <tr><th>Item</th><th>Requirement</th><th>Notes</th></tr>
+                <tr><td>Godot Engine</td><td>4.6</td><td>Verified in both <code>project.godot</code> files (<code>config_version=5</code>)</td></tr>
+                <tr><td>Scripting</td><td>GDScript</td><td>No C# required</td></tr>
+                <tr><td>Renderer (Client)</td><td>Forward Plus</td><td><code>Tps Client/project.godot</code></td></tr>
+                <tr><td>Renderer (Server)</td><td>GL Compatibility</td><td><code>Tps Server/project.godot</code> (headless-friendly)</td></tr>
+                <tr><td>Physics</td><td>Jolt (Server)</td><td><code>Tps Server/project.godot</code>: <code>3d/physics_engine="Jolt Physics"</code></td></tr>
+                <tr><td>Network Port</td><td>UDP 7777</td><td>Configurable via CLI <code>--port=</code> or <code>SERVER_PORT</code> env var</td></tr>
+                <tr><td>Addons</td><td>Mixamo Animation Batcher</td><td>Optional editor plugin (<code>Tps Client/addons/mixamo_animation_batcher/</code>)</td></tr>
+            </table>
+
+            <h3>Step 1: Install Godot 4.6</h3>
+            <p>Download Godot 4.6 from <a href="https://godotengine.org/download" target="_blank" rel="noopener">godotengine.org/download</a>.</p>
+
+            <h3>Step 2: Open the Projects</h3>
+            <ol>
+                <li>Launch Godot, choose "Import," and select <code>Tps Client/project.godot</code>.</li>
+                <li>In a second Godot instance, import <code>Tps Server/project.godot</code>.</li>
+                <li>No external dependencies are required — no npm packages, no backend services, no plugin purchases.</li>
+            </ol>
+
+            <div class="callout info">
+                <h4>💡 Main Scene Configuration</h4>
+                <p>The main scenes are referenced by UID in <code>project.godot</code>:</p>
+                <ul>
+                    <li><strong>Client:</strong> <code>run/main_scene="uid://cqbh3q3pc623w"</code> → <code>Tps Client/game/main_game.tscn</code></li>
+                    <li><strong>Server:</strong> <code>run/main_scene="uid://dg8rv6qkrwdn6"</code> → <code>Tps Server/game/main.tscn</code></li>
+                </ul>
+                <p>If the UID doesn't resolve, set the main scene manually in the Godot editor under <strong>Project → Project Settings → Application → Run → Main Scene</strong>.</p>
+            </div>
+        </section>
+
+        <!-- PROJECT STRUCTURE -->
+        <section id="project-structure" class="content-section">
+            <h2>Project Structure</h2>
+            <p>The repository contains two separate Godot projects plus shared documentation:</p>
+
+            <div class="path">Tps multiplayer/</div>
+<pre><code>README.md                    # Product overview, features, quick start
+architecture.md              # Repository layout and architecture notes
+LICENSE                      # Commercial template license
+LICENSE.md                   # Detailed commercial license terms
+THIRD_PARTY_NOTICES.md       # Third-party asset licenses and attributions
+docs/                        # Detailed developer documentation
+├── index.md                 # Documentation index
+├── architecture.md          # Folder structure, scripts, system interactions
+├── networking.md            # Client-server architecture, RPCs, authority, sync
+├── gameplay.md              # Weapons, health, damage, spawning, match management
+├── ui.md                    # UI scene hierarchy, scripts, navigation flow
+├── configuration.md         # Settings, customization, adding content
+├── api.md                   # Script reference: classes, functions, signals, exports
+├── troubleshooting.md       # Common issues and solutions
+└── disconnect-error-explained.md  # Disconnect error explanation (non-game-breaking)
+Tps Client/                  # Client Godot project (Godot 4.6, Forward Plus)
+├── project.godot
+├── autoload/
+│   ├── client_server.gd     # ENet client, connection, RPC routing
+│   ├── game_state.gd        # Persistent player profile (name, UID, cosmetics)
+│   └── rematch_manager.gd   # Client rematch RPC endpoint
+├── features/
+│   ├── lobby/               # Client lobby RPC endpoint + snapshot interpolation
+│   ├── players/             # Local/remote player controllers, network state
+│   ├── ui/                  # Login, main menu, match HUD, results, pause
+│   ├── weapons/             # Weapon system, data, effects, tracers
+│   └── effects/             # Blood, bullet holes, explosions, damage numbers
+├── game/
+│   ├── main_game.tscn       # Client main scene
+│   ├── local_scene_manager.gd
+│   └── maps/map_farm.tscn   # Client farm map
+└── assets/                  # Models, audio, fonts, textures, animations
+Tps Server/                  # Dedicated server Godot project (Godot 4.6, GL Compatibility)
+├── project.godot
+├── autoload/
+│   ├── dedicated_server.gd  # ENet server, peer lifecycle, matchmaking router
+│   └── rematch_manager.gd   # Server rematch RPC endpoint
+├── features/
+│   ├── combat/              # Authoritative hitscan service
+│   ├── lobby/               # Server lobby registry + match lifecycle
+│   ├── match/               # Match config, rules (TDM), clock
+│   ├── players/             # Server player scenes, spawner, replication
+│   ├── rematch/             # Rematch coordinator + voting
+│   └── weapons/             # Server-readable weapon data
+├── game/
+│   ├── main.tscn            # Server main scene
+│   └── maps/server_map.tscn # Headless server map
+└── assets/                  # Server-required animation resources</code></pre>
+        </section>
+
+        <!-- QUICK START -->
+        <section id="quick-start" class="content-section">
+            <h2>Quick Start</h2>
+            
+            <h3>Starting the Dedicated Server</h3>
+            <p>From the Godot editor, open <code>Tps Server</code> and run the project. <code>main.tscn</code> is the configured main scene.</p>
+            
+            <p>From the command line:</p>
+            <pre><code># Windows (PowerShell)
+godot --path "Tps Server" --headless
+
+# Custom port
+godot --path "Tps Server" --headless --port 7777
+
+# Custom max players
+godot --path "Tps Server" --headless --max-players 12</code></pre>
+
+            <p>Server configuration can also be overridden via environment variables: <code>SERVER_PORT</code>, <code>SERVER_MAX_PLAYERS</code>.</p>
+
+            <div class="callout info">
+                <h4>✅ Success Indicator</h4>
+                <p>You should see in the console:</p>
+                <pre>SERVER LISTENING | UDP PORT: 7777 | MAX CONNECTIONS: 12</pre>
+            </div>
+
+            <h3>Starting the Client</h3>
+            <p>Open <code>Tps Client</code> in Godot and run the project. The client boots to the <strong>Login Screen</strong>, then the <strong>Main Menu</strong>.</p>
+            <p>For local testing, the client defaults to connecting to <code>127.0.0.1:7777</code>, so run the server on the same machine.</p>
+
+            <h3>Testing Multiplayer (2 Clients)</h3>
+            <ol>
+                <li><strong>Start the server</strong> (<code>Tps Server</code>, headless or editor).</li>
+                <li><strong>Start at least two clients</strong> (<code>Tps Client</code>). You can run two editor instances, or one exported client plus one editor client.</li>
+                <li><strong>On each client:</strong> Enter a player name at the login screen, continue to the main menu, and press <strong>Play</strong> to enter matchmaking.</li>
+                <li><strong>When the lobby fills</strong> (max 2 players in the default <code>tdm_1v1</code> config), the server locks the lobby, loads the map, and starts the match.</li>
+                <li><strong>Play:</strong> Move, aim, shoot. Hits are server-authoritative. Watch the kill feed, scoreboard, and health bar.</li>
+                <li><strong>End of match:</strong> When the score limit or timer is reached, the results screen appears. Players can vote for a rematch.</li>
+            </ol>
+        </section>
+
+        <!-- ARCHITECTURE -->
+        <section id="architecture" class="content-section">
+            <h2>Architecture Overview</h2>
+            <p>The project follows a <strong>strict client-server split</strong>:</p>
+
+            <table>
+                <tr><th>Layer</th><th>Client Responsibility</th><th>Server Responsibility</th></tr>
+                <tr><td>Connection</td><td>ENet client (<code>client_server.gd</code>)</td><td>ENet server host (<code>dedicated_server.gd</code>)</td></tr>
+                <tr><td>Lobby</td><td>Client lobby RPC endpoint (<code>Lobby</code>)</td><td>Lobby registry, allocation, matchmaking (<code>ServerLobbyRegistry</code>, <code>Lobby</code>)</td></tr>
+                <tr><td>Combat</td><td>Firing requests (origin/direction/weapon)</td><td>Hitscan validation, raycast, damage, kills (<code>HitscanCombatService</code>)</td></tr>
+                <tr><td>Movement</td><td>Local input, client-side animation</td><td>None (movement is client-authoritative; transforms replicated via snapshots)</td></tr>
+                <tr><td>Health</td><td>Client displays health bar</td><td>Server applies damage, regeneration, death</td></tr>
+                <tr><td>Match State</td><td>Presents timer, scores, results</td><td>Match clock, score limit, end condition, rematch sessions</td></tr>
+                <tr><td>Spawning</td><td>Client instantiates local/remote player scenes</td><td>Server assigns teams, spawns/respawns players</td></tr>
+                <tr><td>Authority</td><td>Local player owns its movement/input</td><td>Server owns match, combat, health, spawn logic</td></tr>
+            </table>
+
+            <h3>RPC Naming Convention</h3>
+            <ul>
+                <li><strong><code>c_*</code></strong> (client → server): e.g., <code>c_fire_hitscan</code>, <code>c_try_connect_client_to_lobby</code></li>
+                <li><strong><code>s_*</code></strong> (server → client): e.g., <code>s_spawn_player</code>, <code>s_match_timer</code></li>
+                <li><strong><code>any_peer</code></strong> RPCs can be called by any peer; <strong><code>authority</strong></strong> RPCs are server-only.</li>
+            </ul>
+
+            <div class="callout info">
+                <h4>📐 Key Design Decision: Movement is Client-Authoritative</h4>
+                <p>The client sends its own transform snapshots to the server, which mirrors them for other clients. The server does <strong>not</strong> simulate client movement. This means movement feels responsive but is theoretically exploitable. Hit registration, however, is fully server-authoritative.</p>
+            </div>
+
+            <h3>Module Ownership</h3>
+            <table>
+                <tr><th>Module</th><th>Responsibility</th></tr>
+                <tr><td>Client <code>autoload/</code></td><td>ENet client session and persistent client game state</td></tr>
+                <tr><td>Client <code>features/lobby/</code></td><td>Stable client lobby RPC surface, map loading, and player/snapshot lookup</td></tr>
+                <tr><td>Client <code>features/players/</code></td><td>Local and remote player scenes, movement/animation components, and player scene factory</td></tr>
+                <tr><td>Client <code>features/ui/</code></td><td>Menu, HUD, pause, result, and match presentation controller</td></tr>
+                <tr><td>Client <code>features/weapons/</code></td><td>Weapon selection/equipment/ammo, camera feedback, client firing requests, and local weapon effects/tracers</td></tr>
+                <tr><td>Client <code>features/effects/</code></td><td>Runtime effect scenes, scripts, and effect Resources</td></tr>
+                <tr><td>Server <code>autoload/</code></td><td>ENet startup, peer lifecycle, and stable server RPC entry points</td></tr>
+                <tr><td>Server <code>features/lobby/</code></td><td>Lobby registry/allocation plus each lobby's membership/readiness and RPC surface</td></tr>
+                <tr><td>Server <code>features/match/</code></td><td>Match clock/lifecycle, configuration, and mode-specific authoritative rules</td></tr>
+                <tr><td>Server <code>features/combat/</code></td><td>Fire request validation, hitscan raycast, damage, and kill handoff</td></tr>
+                <tr><td>Server <code>features/players/</code></td><td>Authoritative player scenes/state, team assignment, spawning, and respawning</td></tr>
+                <tr><td>Server <code>features/weapons/</code></td><td>Server-readable weapon configuration for fire-rate/range/damage checks</td></tr>
+                <tr><td>Server <code>features/rematch/</code></td><td>Original-roster rematch sessions and vote coordination</td></tr>
+            </table>
+        </section>
+
+        <!-- NETWORKING -->
+        <section id="networking" class="content-section">
+            <h2>Networking & Multiplayer</h2>
+            <p>The client and server communicate over <strong>ENet UDP</strong> using Godot's <code>MultiplayerAPI</code> and <code>RPC</code> system.</p>
+
+            <h3>Connection Flow</h3>
+            <ol>
+                <li>Client creates an <code>ENetMultiplayerPeer</code> and connects to the server IP:port.</li>
+                <li>Server accepts the peer, adds it to <code>idle_clients</code> (eligible for matchmaking).</li>
+                <li>Client sends matchmaking request (<code>c_try_connect_client_to_lobby</code>) with UID, name, and cosmetics.</li>
+                <li>Server places the client in a lobby. When the lobby is full, it locks and starts the match.</li>
+                <li>Clients load the map, report readiness, and the server spawns players.</li>
+            </ol>
+
+            <h3>Clock Synchronization</h3>
+            <p>The client sends clock probes (<code>c_clock_probe</code>) to the server. The server replies (<code>s_clock_probe_response</code>) with receive/send timestamps. The client calculates RTT and server offset using an NTP-style midpoint calculation:</p>
+            <pre><code># NTP-style midpoint offset estimation:
+# offset = ((server_received - client_sent) + (server_sent - client_received)) / 2</code></pre>
+
+            <h3>Transform Snapshot Interpolation</h3>
+            <p>The server broadcasts transform snapshots at <strong>20 Hz</strong> (<code>SNAPSHOT_INTERVAL = 0.05</code>). Each snapshot includes position and visual rotation. Clients interpolate between snapshots for smooth remote-player movement.</p>
+            
+            <pre><code># Server broadcasts every SNAPSHOT_INTERVAL
+func broadcast_transform_snapshots() -> void:
+    var snapshots: Dictionary = {}
+    for client_key in clients_data.keys():
+        var character := get_player_character(int(client_key))
+        if character == null: continue
+        var network_transform := character.get_node_or_null("NetworkTransform") as NetworkTransform
+        if network_transform == null: continue
+        snapshots[player_id] = {
+            "position": network_transform.target_position,
+            "rotation": network_transform.target_visual_rotation
+        }
+    s_transform_snapshots.rpc_id(int(client_key), snapshots, snapshot_sequence, server_time_usec)</code></pre>
+
+            <h3>RPC Reliability</h3>
+            <ul>
+                <li><strong>Reliable:</strong> Critical messages (lobby, match start, fire requests, damage)</li>
+                <li><strong>Unreliable:</strong> Match timer (20 Hz timer updates)</li>
+                <li><strong>Unreliable Ordered:</strong> Transform snapshots (20 Hz position updates)</li>
+            </ul>
+
+            <h3>Authority Boundaries</h3>
+            <ul>
+                <li><strong>Server owns:</strong> Combat, damage, health, scores, match clock, team assignment, spawning, respawning.</li>
+                <li><strong>Client owns:</strong> Local movement, input, animation, camera, weapon prediction effects.</li>
+            </ul>
+
+            <div class="callout warning">
+                <h4>⚠️ Known Limitation</h4>
+                <p>Client-supplied fire origin/direction is <strong>not</strong> validated against the shooter's actual position. A malicious client could shoot from arbitrary positions. This is documented as a future security task.</p>
+            </div>
+        </section>
+
+        <!-- GAMEPLAY -->
+        <section id="gameplay" class="content-section">
+            <h2>Gameplay & Combat</h2>
+
+            <h3>Weapons</h3>
+            <p>Two weapons: <strong>AK47</strong> (rifle) and <strong>MP5</strong> (submachine gun). Each project has separate <code>WeaponData</code> resources. The <code>weapon_id</code> must match between client and server copies.</p>
+
+            <h4>Server Weapon Data (<code>Tps Server/features/weapons/data/</code>)</h4>
+            <pre><code>[gd_resource type="Resource" script_class="WeaponData"]
+weapon_id = "Ak47"
+damage = 20.0
+fire_rate = 10.0
+range = 30.0
+magazine_size = 30
+reload_time = 4.0</code></pre>
+
+            <div class="path">Tps Server/features/combat/hitscan_combat_service.gd</div>
+            <pre><code>func handle_fire_request(
+    shooter_id: int,
+    origin: Vector3,
+    direction: Vector3,
+    weapon_id: String
+) -> void:
+    # Validation: match running, shooter in lobby, alive, weapon equipped
+    if not lobby.match_running or not lobby.clients_data.has(shooter_id):
+        return
+    
+    var shooter := lobby.get_player_character(shooter_id)
+    var network_health := shooter.get_node_or_null("NetworkHealth") as NetworkHealth
+    if network_health == null or network_health.is_dead:
+        return
+
+    # Fire rate enforcement
+    var shot_interval := 1.0 / weapon_data.fire_rate
+    if current_time - last_shot < shot_interval:
+        return
+
+    last_shot_times[shooter_id] = current_time
+    
+    # Authoritative raycast
+    var query := PhysicsRayQueryParameters3D.create(
+        origin,
+        origin + direction.normalized() * weapon_data.range
+    )
+    # ... raycast logic, hit-zone detection, damage application
+    
+    # Damage with hit-zone and range multipliers
+    var damage_multiplier := 1.0
+    match hit_zone:
+        "legs": damage_multiplier = 0.3
+        "torso": damage_multiplier = 1.0
+        "head": damage_multiplier = 4.0
+    
+    var actual_damage := weapon_data.damage * (1.0 - range_ratio * 0.5) * damage_multiplier
+    target_health.health = max(target_health.health - actual_damage, 0.0)</code></pre>
+
+            <h3>Health & Damage</h3>
+            <ul>
+                <li><strong>Hit Zones:</strong> Head (4×), Torso (1×), Legs (0.3)</li>
+                <li><strong>Range Falloff:</strong> Damage decreases with distance (up to 50% reduction at max range)</li>
+                <li><strong>Spawn Invincibility:</strong> Newly spawned players are invincible for 5 seconds</li>
+                <li><strong>Health Regeneration:</strong> Server-owned, begins 3 seconds after damage, restores 10 HP/second</li>
+            </ul>
+
+            <h3>Team Assignment</h3>
+            <p>Teams are assigned alternately (Blue = 0, Red = 1) during spawning. Spawn points are selected by name prefix (<code>"Blue..."</code> / <code>"Red..."</code>).</p>
+
+            <div class="path">Tps Server/features/players/match_player_spawner.gd</div>
+            <pre><code>func spawn_players() -> void:
+    var spawn_points := _get_lobby_spawn_points()
+    var blue_spawn_points: Array[Node3D] = []
+    var red_spawn_points: Array[Node3D] = []
+    
+    for spawn_point in spawn_points:
+        if spawn_point.name.begins_with("Blue"):
+            blue_spawn_points.append(spawn_point)
+        elif spawn_point.name.begins_with("Red"):
+            red_spawn_points.append(spawn_point)
+    
+    lobby.ready_clients.shuffle()
+    
+    for i in lobby.ready_clients.size():
+        var team := 0
+        if i % 2 == 0:
+            team = 0  # Blue
+            spawn_transform = blue_spawn_points[0].global_transform
+        else:
+            team = 1  # Red
+            spawn_transform = red_spawn_points[0].global_transform
+        # ... instantiate PlayerServer, assign authority, notify clients</code></pre>
+        </section>
+
+        <!-- MATCH LIFECYCLE -->
+        <section id="match-lifecycle" class="content-section">
+            <h2>Match Lifecycle</h2>
+
+            <h3>States</h3>
+            <ul>
+                <li><strong>IDLE:</strong> Waiting for players</li>
+                <li><strong>LOCKED:</strong> Full / loading map</li>
+                <li><strong>GAME:</strong> Match in progress</li>
+            </ul>
+
+            <h3>Flow</h3>
+            <ol>
+                <li>Client requests matchmaking (<code>c_try_connect_client_to_lobby</code>).</li>
+                <li>Server places client in lobby, tracks readiness (<code>c_lock_client</code>).</li>
+                <li>When all clients ready, server loads map (<code>s_start_loading_map</code>).</li>
+                <li>Clients load map, report ready (<code>c_map_ready</code>).</li>
+                <li>Server spawns players, starts match timer (<code>s_start_match</code>).</li>
+                <li>Match runs until score limit or time expires.</li>
+                <li>Server ends match (<code>end_match</code>), shows results, offers rematch.</li>
+            </ol>
+
+            <h3>Match Config (<code>tdm_1v1.tres</code>)</h3>
+            <pre><code>[gd_resource type="Resource" script_class="MatchConfig"]
+mode_id = "tdm"
+match_duration = 400.0
+score_limit = 20
+max_players = 2
+team_count = 2
+respawn_enabled = true
+spawn_invincibility_time = 5.0
+respawn_delay = 0.0</code></pre>
+
+            <h3>Rematch Voting</h3>
+            <p>After match end, the server creates a rematch session from the original roster. All original players must vote. When everyone votes, a replacement lobby is created.</p>
+            
+            <div class="path">Tps Server/features/rematch/server_rematch_coordinator.gd</div>
+            <pre><code>func handle_request(client_id: int, session_id: String) -> void:
+    if not sessions.has(session_id): return
+    var session: Dictionary = sessions[session_id]
+    var player_ids: Array = session["player_ids"]
+    if not player_ids.has(client_id): return
+    
+    var requested: Dictionary = session["requested"]
+    if requested.has(client_id): return  # No duplicate votes
+    
+    requested[client_id] = true
+    
+    if requested.size() >= player_ids.size():
+        start_session(session_id)  # All voted - create replacement lobby</code></pre>
+        </section>
+
+        <!-- UI SYSTEM -->
+        <section id="ui-system" class="content-section">
+            <h2>UI System</h2>
+            <p>The client features a complete UI suite built with Godot <code>Control</code> nodes.</p>
+
+            <table>
+                <tr><th>Screen</th><th>File</th><th>Purpose</th></tr>
+                <tr><td>Login</td><td><code>features/ui/login_screen/login_screen.tscn</code></td><td>Player name entry, UID generation, persistence to <code>user://</code></td></tr>
+                <tr><td>Main Menu</td><td><code>features/ui/main_menu/main_menu.tscn</code></td><td>Player name/UID display, Play/Exit buttons</td></tr>
+                <tr><td>Matchmaking</td><td><code>features/ui/main_menu/match_making_ui.gd</code></td><td>Lobby population status, cancel search</td></tr>
+                <tr><td>Match HUD</td><td><code>features/ui/match_ui/match_ui.tscn</code></td><td>Health bar, ammo, ping, kill feed, kill count</td></tr>
+                <tr><td>Match Results</td><td><code>features/ui/match_ui/match_results.tscn</code></td><td>Victory/Defeat/Draw, scores, rematch voting</td></tr>
+                <tr><td>Pause Menu</td><td><code>features/ui/pause_menu/pause_menu.tscn</code></td><td>Resume / Exit to main menu</td></tr>
+            </table>
+
+            <h3>Player Profile (GameState)</h3>
+            <p>Persistent player data is stored in <code>user://</code>:</p>
+            <pre><code># Tps Client/autoload/game_state.gd
+var player_name: String = ""
+var player_uid: String = ""  # 128-bit hex, generated once at first login
+var player_cosmetics: Dictionary = {}  # Carried to server as presentation data</code></pre>
+
+            <div class="callout info">
+                <h4>🔐 UID Persistence</h4>
+                <p>A cryptographically secure 128-bit hex UID is generated at first login and saved to <code>user://player_uid.dat</code>. Returning players skip the name entry screen.</p>
+            </div>
+        </section>
+
+        <!-- CONFIGURATION -->
+        <section id="configuration" class="content-section">
+            <h2>Configuration & Customization</h2>
+
+            <h3>Client Network</h3>
+            <p><code>Tps Client/autoload/client_server.gd</code>:</p>
+            <pre><code>var IP_ADDRESS: String = "127.0.0.1"
+var PORT: int = 7777
+# Overridable via --ip=, --port= CLI flags or SERVER_IP, SERVER_PORT env vars</code></pre>
+
+            <h3>Server Network</h3>
+            <p><code>Tps Server/autoload/dedicated_server.gd</code>:</p>
+            <pre><code>var PORT: int = 7777
+var Max_Players: int = 12
+const MAX_LOBBIES: int = 4
+# Overridable via --port=, --max-players= or SERVER_PORT, SERVER_MAX_PLAYERS</code></pre>
+
+            <h3>Match Config</h3>
+            <p>Edit <code>Tps Server/features/match/data/tdm_1v1.tres</code> for match duration, score limit, max players, etc.</p>
+
+            <h3>Adding a Game Mode</h3>
+            <ol>
+                <li>Create a <code>MatchRules</code> subclass in <code>Tps Server/features/match/</code>.</li>
+                <li>Create a <code>.tres</code> <code>MatchConfig</code> referencing the rules script.</li>
+                <li>Assign it to <code>match_config</code> in <code>dedicated_server.gd</code>.</li>
+                <li>Add client presentation only when the mode needs it.</li>
+            </ol>
+        </section>
+
+        <!-- WEAPONS -->
+        <section id="weapons" class="content-section">
+            <h2>Adding Weapons</h2>
+            <p>Each project has separate <code>WeaponData</code> resources. The <code>weapon_id</code> must match between client and server.</p>
+
+            <h3>1. Create Client Data</h3>
+            <p><code>Tps Client/features/weapons/data/&lt;name&gt;_data.tres</code>:</p>
+            <pre><code>weapon_id = "NewWeapon"
+damage = 25.0
+fire_rate = 10.0
+range = 100.0
+magazine_size = 30
+reload_time = 2.0
+weapon_scene = ExtResource("...")
+weapon_icon = ExtResource("...")</code></pre>
+
+            <h3>2. Create Server Data</h3>
+            <p><code>Tps Server/features/weapons/data/&lt;name&gt;_data.tres</code>:</p>
+            <pre><code>weapon_id = "NewWeapon"
+damage = 25.0
+fire_rate = 10.0
+range = 100.0
+magazine_size = 30
+reload_time = 2.0
+weapon_range = 100.0</code></pre>
+
+            <div class="callout warning">
+                <h4>⚠️ Important</h4>
+                <p>The server weapon database is <strong>hard-coded</strong> in <code>Tps Server/features/combat/hitscan_combat_service.gd</code>. You must append the new server <code>.tres</code> to the <code>weapon_database</code> array for the server to recognize it.</p>
+            </div>
+        </section>
+
+        <!-- MAPS -->
+        <section id="maps" class="content-section">
+            <h2>Adding Maps</h2>
+            <p>Map paths are hard-coded. You must edit both client and server lobby scripts:</p>
+
+            <ul>
+                <li><strong>Client:</strong> <code>Tps Client/features/lobby/lobby.gd</code> → <code>s_start_loading_map()</code> loads <code>map_farm.tscn</code></li>
+                <li><strong>Server:</strong> <code>Tps Server/features/lobby/lobby.gd</code> → preloads <code>server_map.tscn</code></li>
+            </ul>
+
+            <p>Create new <code>.tscn</code> maps under:</p>
+            <ul>
+                <li><code>Tps Client/game/maps/</code></li>
+                <li><code>Tps Server/game/maps/</code></li>
+            </ul>
+
+            <p>Add spawn-point <code>Node3D</code>s in group <code>"SpawnPoints"</code> with name prefix <code>"Blue..."</code> / <code>"Red..."</code> for team-based spawning.</p>
+
+            <div class="callout info">
+                <h4>📐 Spawn Point Naming</h4>
+                <p>Blue team: nodes starting with <code>"Blue"</code><br>
+                Red team: nodes starting with <code>"Red"</code></p>
+            </div>
+        </section>
+
+        <!-- EXPORT -->
+        <section id="export" class="content-section">
+            <h2>Export & Build</h2>
+            <p>Export templates must be installed for your target platforms. Configure <code>export_presets.cfg</code> in each project.</p>
+
+            <div class="callout warning">
+                <h4>⚠️ Export Presets</h4>
+                <p>Export preset configuration is project-specific. Configure <code>export_presets.cfg</code> in both <code>Tps Client/</code> and <code>Tps Server/</code> before building. The server preset should have <code>dedicated_server=true</code>.</p>
+            </div>
+
+            <h3>Server Export</h3>
+            <ul>
+                <li>Renderer: GL Compatibility</li>
+                <li>Physics: Jolt</li>
+                <li>Flag: <code>dedicated_server=true</code></li>
+            </ul>
+
+            <h3>Client Export</h3>
+            <ul>
+                <li>Renderer: Forward Plus</li>
+                <li>Flag: <code>dedicated_server=false</code></li>
+            </ul>
+        </section>
+
+        <!-- API REFERENCE -->
+        <section id="api" class="content-section">
+            <h2>API Reference</h2>
+
+            <h3>Key Classes</h3>
+            <table>
+                <tr><th>Class</th><th>File</th><th>Responsibility</th></tr>
+                <tr><td><code>Lobby</code></td><td>Both <code>features/lobby/lobby.gd</code></td><td>Match lifecycle, player management, snapshots, combat delegation</td></tr>
+                <tr><td><code>HitscanCombatService</code></td><td><code>Tps Server/features/combat/hitscan_combat_service.gd</code></td><td>Authoritative hitscan, damage, kills</td></tr>
+                <tr><td><code>MatchPlayerSpawner</code></td><td><code>Tps Server/features/players/match_player_spawner.gd</code></td><td>Team assignment, spawn points, respawning</td></tr>
+                <tr><td><code>WeaponSystem</code></td><td><code>Tps Client/features/weapons/scripts/weapon_system.gd</code></td><td>Loadout, aim, shoot, reload, fire requests</td></tr>
+                <tr><td><code>ClientServer</code></td><td><code>Tps Client/autoload/client_server.gd</code></td><td>ENet client, connection, clock sync</td></tr>
+                <tr><td><code>DedicatedServer</code></td><td><code>Tps Server/autoload/dedicated_server.gd</code></td><td>ENet server, peer lifecycle, matchmaking router</td></tr>
+                <tr><td><code>GameState</code></td><td><code>Tps Client/autoload/game_state.gd</code></td><td>Persistent player profile (name, UID, cosmetics)</td></tr>
+                <tr><td><code>ServerRematchCoordinator</code></td><td><code>Tps Server/features/rematch/server_rematch_coordinator.gd</code></td><td>Rematch voting sessions</td></tr>
+            </table>
+
+            <h3>Key RPCs</h3>
+            <table>
+                <tr><th>RPC</th><th>Direction</th><th>Purpose</th></tr>
+                <tr><td><code>c_try_connect_client_to_lobby</code></td><td>Client → Server</td><td>Matchmaking request with UID, name, cosmetics</td></tr>
+                <tr><td><code>c_fire_hitscan</code></td><td>Client → Server</td><td>Fire request (origin, direction, weapon_id)</td></tr>
+                <tr><td><code>c_clock_probe</code></td><td>Client → Server</td><td>Clock synchronization probe</td></tr>
+                <tr><td><code>c_lock_client</code></td><td>Client → Server</td><td>Client ready in lobby</td></tr>
+                <tr><td><code>c_map_ready</code></td><td>Client → Server</td><td>Client finished map loading</td></tr>
+                <tr><td><code>c_request_respawn</code></td><td>Client → Server</td><td>Respawn request after death</td></tr>
+                <tr><td><code>c_request_leave_match</code></td><td>Client → Server</td><td>Leave match request</td></tr>
+                <tr><td><code>s_spawn_player</code></td><td>Server → Client</td><td>Spawn player at transform with team</td></tr>
+                <tr><td><code>s_transform_snapshots</code></td><td>Server → Client</td><td>20 Hz transform broadcast</td></tr>
+                <tr><td><code>s_match_timer</code></td><td>Server → Client</td><td>Match time remaining</td></tr>
+                <tr><td><code>s_match_time_expired</code></td><td>Server → Client</td><td>Match end results + rematch availability</td></tr>
+                <tr><td><code>s_kill_registered</code></td><td>Server → Client</td><td>Kill feed update</td></tr>
+                <tr><td><code>s_weapon_fired</code></td><td>Server → Client</td><td>Remote weapon fire effect</td></tr>
+                <tr><td><code>s_weapon_impact</code></td><td>Server → Client</td><td>Hit impact effect</td></tr>
+            </table>
+        </section>
+
+        <!-- TROUBLESHOOTING -->
+        <section id="troubleshooting" class="content-section">
+            <h2>Troubleshooting</h2>
+
+            <table>
+                <tr><th>Problem</th><th>Likely Cause</th><th>First Step</th></tr>
+                <tr><td>Client can't connect</td><td>Server not running, wrong IP/port, firewall</td><td>Verify server is listening on UDP 7777; check <code>SERVER_IP</code></td></tr>
+                <tr><td>Lobby won't fill</td><td>Not enough players; default <code>max_players=2</code></td><td>Start two clients; check <code>lobby_clients_updated</code> signal</td></tr>
+                <tr><td>Hits not registering</td><td>Server-authoritative validation (fire rate, weapon equipped, invincibility)</td><td>Confirm shooter is alive, not invincible, and weapon matches</td></tr>
+                <tr><td>No remote players visible</td><td><code>MultiplayerSynchronizer</code> visibility not set</td><td>Check lobby <code>clients_data</code> membership and authority</td></tr>
+                <tr><td>Ping shows --</td><td>Clock sync probes not yet received</td><td>Wait a few seconds; check server/client are on same network</td></tr>
+                <tr><td>Disconnect errors</td><td><code>MultiplayerSynchronizer</code> scene-cache stale references</td><td>See <a href="#disconnect-errors">Disconnect Errors Explained</a></td></tr>
+            </table>
+
+            <h3>Connection Debugging</h3>
+            <p>Press <strong>F3</strong> in debug builds for detailed network diagnostics (RTT samples, jitter, frame times). Ping is also displayed on the match HUD.</p>
+        </section>
+
+        <!-- DISCONNECT ERRORS -->
+        <section id="disconnect-errors" class="content-section">
+            <h2>Disconnect Errors Explained</h2>
+            
+            <div class="callout warning">
+                <h4>⚠️ Non-Game-Breaking Console Errors</h4>
+                <p>When a player disconnects during or after a match, you may see messages like these in the Godot console:</p>
+                <pre>E   get_node: Node not found: "Server/&lt;lobby_id&gt;/&lt;peer_id&gt;/Player/MultiplayerSynchronizer"
+E   get_cached_object: Failed to get cached node from peer &lt;peer_id&gt; with cache ID 3.</pre>
+                <p>These errors can appear on the <strong>server</strong>, on <strong>remaining clients</strong>, or on <strong>both</strong>, and they may repeat every frame for a few seconds after the disconnect.</p>
+                <p><strong>This is non-game-breaking.</strong> Match results, scoring, rematches, and reconnection all work normally.</p>
+            </div>
+
+            <h3>Why It Happens</h3>
+            <p>Godot's <code>MultiplayerAPI</code> maintains a <strong>scene cache</strong> mapping <code>(peer_id, cache_id) → node</code> for every node with a <code>MultiplayerSynchronizer</code>/<code>HealthSynchronizer</code>.</p>
+            <p>When a player disconnects:</p>
+            <ol>
+                <li>Their player character node (with synchronizers) is removed from the scene tree.</li>
+                <li>Godot's <code>MultiplayerAPI</code> scene cache may still hold a reference to those synchronizer nodes, keyed by the departed peer's ID.</li>
+                <li>When Godot processes the disconnect, or when remaining players continue sending/receiving snapshots, the engine looks up that peer ID in its cache — but the node has already been freed.</li>
+                <li>The engine reports <code>get_cached_object</code> and <code>get_node</code> errors.</li>
+            </ol>
+
+            <h3>What's Been Done to Mitigate</h3>
+            <ul>
+                <li><strong>Authority release before free:</strong> Before any player node is freed, the server explicitly transfers <code>MultiplayerSynchronizer</code> authority back to the server (peer 1) and sets visibility to <code>false</code> for all remaining peers.</li>
+                <li><strong><code>queue_free()</code> instead of <code>call_deferred("queue_free")</code>:</strong> <code>queue_free()</code> removes the node at end of frame, giving <code>MultiplayerAPI</code> one final frame to clean up its cache.</li>
+                <li><strong>Lobby kept alive until peers disconnect:</strong> After match end, the lobby stays alive until all clients disconnect, rather than being freed immediately while peers are still connected.</li>
+                <li><strong>Client-side authority release:</strong> Client <code>s_player_left_match</code> and <code>request_leave_to_main_menu</code> also release synchronizer authority before freeing.</li>
+            </ul>
+
+            <p>If errors persist after these mitigations, check for any <code>get_node()</code> (not <code>get_node_or_null()</code>) calls targeting player synchronizers after disconnect.</p>
+        </section>
+
+        <!-- LICENSE -->
+        <section id="license" class="content-section">
+            <h2>License & Commercial Terms</h2>
+
+            <div class="callout danger">
+                <h4>⚖️ Important Legal Notice</h4>
+                <p>This template is a commercial product. Third-party assets remain the property of their respective copyright holders. Nothing in this license grants rights in third-party assets beyond those granted by their own licenses.</p>
+            </div>
+
+            <h3>What You May Do</h3>
+            <ul>
+                <li>Use the template to develop and commercially distribute one or more video games</li>
+                <li>Modify the template source code, scenes, and assets for use in your game</li>
+                <li>Distribute your game, including compiled builds that embed template code and assets</li>
+                <li>Publish on any platform and store</li>
+            </ul>
+
+            <h3>What You May NOT Do</h3>
+            <ul>
+                <li>Resell, redistribute, sublicense, or distribute the template itself, in whole or in part, as a standalone product, asset-pack, or game template (whether modified or unmodified)</li>
+                <li>Publish the template source code or assets on a public repository, asset library, or marketplace without written permission</li>
+                <li>Remove or obscure license, copyright notices, or third-party attribution</li>
+                <li>Claim ownership of the original template</li>
+            </ul>
+
+            <h3>Third-Party Components</h3>
+            <p>The project includes third-party assets under their own licenses. See <code>THIRD_PARTY_NOTICES.md</code> for the full inventory.</p>
+            
+            <table>
+                <tr><th>Component</th><th>Location</th><th>License</th><th>Commercial Use</th><th>Redistribution in Template</th></tr>
+                <tr><td>Template Code</td><td><code>Tps Client/</code>, <code>Tps Server/</code></td><td>Commercial</td><td>Yes</td><td>Prohibited (template resale banned)</td></tr>
+                <tr><td>Open Sans Font</td><td><code>assets/fonts/Open_Sans/</code></td><td>SIL OFL 1.1</td><td>Yes</td><td>Yes</td></tr>
+                <tr><td>Kenney Prototype Textures</td><td><code>addons/kenney_prototype_textures/</code></td><td>CC0 1.0</td><td>Yes</td><td>Yes</td></tr>
+                <tr><td>Mixamo Animation Batcher</td><td><code>addons/mixamo_animation_batcher/</code></td><td>MIT</td><td>Yes</td><td>Yes (MIT notice required)</td></tr>
+                <tr><td>Quaternius Animations</td><td><code>assets/Animations/</code></td><td>CC0 1.0</td><td>Yes</td><td>Yes</td></tr>
+                <tr><td>Pixabay Audio</td><td><code>assets/audio/weapons/</code></td><td>Pixabay Content License</td><td>Yes</td><td>See source listing</td></tr>
+                <tr><td>Poly Pizza Models</td><td><code>assets/meshes/guns_model/</code></td><td>CC0 / CC BY 3.0</td><td>Yes</td><td>See creator page</td></tr>
+                <tr><td>Pngtree Muzzle Flash</td><td><code>assets/effects/weapons/muzzle_flash.png</code></td><td>"Free License"</td><td>See source listing</td><td>See source listing</td></tr>
+            </table>
+        </section>
+
+        <footer>
+            <p><strong>Godot TPS Multiplayer Template</strong> — Godot 4.6</p>
+            <p>Built with Godot 4.6. Client and server are separate Godot projects; each has its own <code>project.godot</code>, scenes, and <code>res://</code> namespace.</p>
+            <p>No external backend, matchmaking service, or cloud backend required. Buyers host their own dedicated server.</p>
+        </footer>
+    </main>
+
+    <script>
+        // Sidebar toggle for mobile
+        const mobileToggle = document.getElementById('mobileToggle');
+        const sidebar = document.getElementById('sidebar');
+        
+        mobileToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('open');
+        });
+
+        // Close sidebar when clicking a link on mobile
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', () => {
+                if (window.innerWidth <= 768) {
+                    sidebar.classList.remove('open');
+                }
+            });
+        });
+
+        // Active nav link highlighting
+        const navLinks = document.querySelectorAll('.nav-link');
+        const sections = document.querySelectorAll('.content-section');
+        
+        function setActiveLink() {
+            const scrollPos = window.scrollY + 100;
+            
+            sections.forEach(section => {
+                const top = section.offsetTop;
+                const bottom = top + section.offsetHeight;
+                const id = section.getAttribute('id');
+                
+                if (scrollPos >= top && scrollPos < bottom) {
+                    navLinks.forEach(link => {
+                        link.classList.remove('active');
+                        if (link.getAttribute('href') === '#' + id) {
+                            link.classList.add('active');
+                        }
+                    });
+                }
+            });
+        }
+
+        window.addEventListener('scroll', setActiveLink);
+        setActiveLink();
+
+        // Search functionality
+        const searchInput = document.getElementById('navSearch');
+        const navItems = document.querySelectorAll('.nav-item');
+
+        searchInput.addEventListener('input', (e) => {
+            const term = e.target.value.toLowerCase();
+            navItems.forEach(item => {
+                const text = item.textContent.toLowerCase();
+                if (text.includes(term)) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+
+        // Back to top button
+        const backToTop = document.getElementById('backToTop');
+        
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 300) {
+                backToTop.style.display = 'block';
+            } else {
+                backToTop.style.display = 'none';
+            }
+        });
+
+        backToTop.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    </script>
+</body>
+</html>
